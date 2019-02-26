@@ -28,7 +28,7 @@ func NewSchemaValidator(Config Config) (SchemaValidator, error) {
 	if Config.Request != nil {
 		schemaValidator.req = Config.Request
 	} else {
-		return nil, errors.New("request is nil")
+		return SchemaValidator{}, errors.New("request is nil")
 	}
 
 	schemaValidator.formatFuncMap = Config.FormatFuncMap
@@ -70,7 +70,7 @@ func (schemaValidator SchemaValidator) Encode(in interface{}) error {
 		}
 
 		if formatName := tag.Get("format"); formatName != "" {
-			if v, err := schemaValidator.Format(validatorName, formStr); err != nil {
+			if v, err := schemaValidator.Format(formatName, formStr); err != nil {
 				return err
 			} else {
 				formValue = v
@@ -78,6 +78,7 @@ func (schemaValidator SchemaValidator) Encode(in interface{}) error {
 		}
 
 	}
+	return nil
 }
 
 func (schemaValidator SchemaValidator) Validate(validatorName, formStr string) (bool, error) {
