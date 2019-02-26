@@ -41,10 +41,16 @@ func (schemaValidator SchemaValidator) Encode(in interface{}) error {
 	if value.Kind() != reflect.Struct {
 		return errors.New(fmt.Sprintf("%s should be a struct kind", in))
 	}
+	if !value.CanSet() {
+		return errors.New(fmt.Sprintf("%s should be addressable", in))
+
+	}
+
 	inType := reflect.TypeOf(in)
 
 	for i := 0; i < inType.NumField(); i++ {
 		field := inType.Field(i)
+		fieldValue := value.Field(i)
 		name := field.Name
 		tag := field.Tag
 		var required bool
@@ -75,6 +81,13 @@ func (schemaValidator SchemaValidator) Encode(in interface{}) error {
 			} else {
 				formValue = v
 			}
+		}
+
+		switch fieldValue.Kind() {
+		case reflect.Int:
+			fieldValue.SetInt(int64(formValue.(int)))
+		case reflect.String:
+			fieldValue.SetString(formValue.(string))
 		}
 
 	}
