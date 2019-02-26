@@ -11,6 +11,15 @@ import (
 // 	Name string `field: "name" format: "" validator "" required`
 // }
 
+var CommomCalidators = map[string]func(in string) (bool, error){
+	"email": func(in string) (bool, error) {
+		return rxEmail.MatchString(in), nil
+	},
+	"url": func(in string) (bool, error) {
+		return rxURL.MatchString(in), nil
+	},
+}
+
 type SchemaValidator struct {
 	req              *http.Request
 	formatFuncMap    map[string]func(in string) (out interface{}, err error)
@@ -32,7 +41,17 @@ func NewSchemaValidator(Config Config) (SchemaValidator, error) {
 	}
 
 	schemaValidator.formatFuncMap = Config.FormatFuncMap
-	schemaValidator.validatorFuncMap = Config.ValidatorFuncMap
+	if Config.ValidatorFuncMap != nil {
+		for k, v := range CommomCalidators {
+			if _, ok := Config.ValidatorFuncMap[k]; !ok {
+				Config.ValidatorFuncMap[k] = v
+			}
+		}
+		schemaValidator.validatorFuncMap = Config.ValidatorFuncMap
+	} else {
+		schemaValidator.validatorFuncMap = CommomCalidators
+	}
+
 	return schemaValidator, nil
 }
 
