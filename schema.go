@@ -57,7 +57,7 @@ func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request)
 		return errors.New(fmt.Sprintf("%s should be a struct kind", in))
 	}
 	if !value.CanSet() {
-		return errors.New(fmt.Sprintf("%s should be addressable", in))
+		return errors.New(fmt.Sprintf("%+v should be addressable", in))
 
 	}
 
