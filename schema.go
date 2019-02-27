@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var commomCalidators = map[string]func(in string) (bool, error){
+var commomValidators = map[string]func(in string) (bool, error){
 	"email": func(in string) (bool, error) {
 		if !rxEmail.MatchString(in) {
 			return false, errors.New(fmt.Sprintf("%s is not passed", "email"))
@@ -37,14 +37,14 @@ func NewSchemaValidator(Config Config) (SchemaValidator, error) {
 	schemaValidator := SchemaValidator{}
 	schemaValidator.formatFuncMap = Config.FormatFuncMap
 	if Config.ValidatorFuncMap != nil {
-		for k, v := range commomCalidators {
+		for k, v := range commomValidators {
 			if _, ok := Config.ValidatorFuncMap[k]; !ok {
 				Config.ValidatorFuncMap[k] = v
 			}
 		}
 		schemaValidator.validatorFuncMap = Config.ValidatorFuncMap
 	} else {
-		schemaValidator.validatorFuncMap = commomCalidators
+		schemaValidator.validatorFuncMap = commomValidators
 	}
 
 	return schemaValidator, nil
