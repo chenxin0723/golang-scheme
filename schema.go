@@ -45,8 +45,8 @@ func NewSchemaValidator(Config Config) (SchemaValidator, error) {
 
 func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request) error {
 
-	value := reflect.ValueOf(in)
-	if reflect.Indirect(value).Kind() != reflect.Struct {
+	value := reflect.Indirect(reflect.ValueOf(in))
+	if value.Kind() != reflect.Struct {
 		return errors.New(fmt.Sprintf("%s should be a struct kind", in))
 	}
 	if !value.CanSet() {
@@ -54,8 +54,7 @@ func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request)
 
 	}
 
-	inType := reflect.TypeOf(in)
-
+	inType := reflect.TypeOf(value.Interface())
 	for i := 0; i < inType.NumField(); i++ {
 		field := inType.Field(i)
 		fieldValue := value.Field(i)
@@ -63,6 +62,7 @@ func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request)
 		tag := field.Tag
 		var required bool
 		if fieldName := tag.Get("field"); fieldName != "" {
+
 			name = fieldName
 		}
 		if _, ok := tag.Lookup("required"); ok {
@@ -78,8 +78,9 @@ func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request)
 		}
 
 		if validatorName := tag.Get("validator"); validatorName != "" {
-			if passed, err := schemaValidator.Validate(validatorName, formStr); passed == false {
-				return err
+
+			if passed, _ := schemaValidator.Validate(validatorName, formStr); passed == false {
+				return errors.New(fmt.Sprintf("validator %s did not pass", validatorName))
 			}
 		}
 
