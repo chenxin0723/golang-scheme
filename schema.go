@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 var commomValidators = map[string]func(in string) (bool, error){
@@ -65,7 +66,8 @@ func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request)
 	for i := 0; i < inType.NumField(); i++ {
 		field := inType.Field(i)
 		fieldValue := value.Field(i)
-		name := field.Name
+		name := strings.ToLower(field.Name)
+		// name := field.Name
 		tag := field.Tag
 		var required bool
 		if fieldName := tag.Get("field"); fieldName != "" {

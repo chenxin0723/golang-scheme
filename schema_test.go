@@ -10,13 +10,13 @@ import (
 )
 
 type People struct {
-	Name  string `field:"name" format:"uppercase" required:"true"`
+	Name  string `format:"uppercase" required:"true"`
 	Age   int    `validator:"max_age_150"`
-	Email string `field:"email" validator:"email" required:"true"`
+	Email string `field:"my_email" validator:"email" required:"true"`
 }
 
 func TestAddressable(t *testing.T) {
-	req := &http.Request{Form: url.Values{"name": []string{"xin"}, "Age": []string{"22"}, "email": []string{"xin@theplant.jp"}}}
+	req := &http.Request{Form: url.Values{"name": []string{"xin"}, "age": []string{"22"}, "my_email": []string{"xin@theplant.jp"}}}
 	schemaValidator, _ := NewSchemaValidator(Config{
 		ValidatorFuncMap: map[string]func(in string) (bool, error){
 			"max_age_150": func(in string) (bool, error) {
