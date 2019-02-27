@@ -7,10 +7,6 @@ import (
 	"reflect"
 )
 
-// type People struct {
-// 	Name string `field: "name" format: "" validator "" required`
-// }
-
 var CommomCalidators = map[string]func(in string) (bool, error){
 	"email": func(in string) (bool, error) {
 		return rxEmail.MatchString(in), nil
@@ -21,25 +17,17 @@ var CommomCalidators = map[string]func(in string) (bool, error){
 }
 
 type SchemaValidator struct {
-	req              *http.Request
 	formatFuncMap    map[string]func(in string) (out interface{}, err error)
 	validatorFuncMap map[string]func(in string) (bool, error)
 }
 
 type Config struct {
-	Request          *http.Request
 	FormatFuncMap    map[string]func(in string) (out interface{}, err error)
 	ValidatorFuncMap map[string]func(in string) (bool, error)
 }
 
 func NewSchemaValidator(Config Config) (SchemaValidator, error) {
 	schemaValidator := SchemaValidator{}
-	if Config.Request != nil {
-		schemaValidator.req = Config.Request
-	} else {
-		return SchemaValidator{}, errors.New("request is nil")
-	}
-
 	schemaValidator.formatFuncMap = Config.FormatFuncMap
 	if Config.ValidatorFuncMap != nil {
 		for k, v := range CommomCalidators {
@@ -55,9 +43,10 @@ func NewSchemaValidator(Config Config) (SchemaValidator, error) {
 	return schemaValidator, nil
 }
 
-func (schemaValidator SchemaValidator) Encode(in interface{}) error {
+func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request) error {
+
 	value := reflect.ValueOf(in)
-	if value.Kind() != reflect.Struct {
+	if reflect.Indirect(value).Kind() != reflect.Struct {
 		return errors.New(fmt.Sprintf("%s should be a struct kind", in))
 	}
 	if !value.CanSet() {
@@ -80,7 +69,7 @@ func (schemaValidator SchemaValidator) Encode(in interface{}) error {
 			required = true
 		}
 
-		formStr := schemaValidator.req.FormValue(name)
+		formStr := req.FormValue(name)
 		var formValue interface{}
 		formValue = formStr
 
