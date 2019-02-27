@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"reflect"
+	"strconv"
 )
 
 var CommomCalidators = map[string]func(in string) (bool, error){
@@ -100,7 +101,12 @@ func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request)
 
 		switch fieldValue.Kind() {
 		case reflect.Int:
-			fieldValue.SetInt(int64(formValue.(int)))
+			i, err := strconv.Atoi(formValue.(string))
+			if err == nil {
+				fieldValue.SetInt(int64(i))
+			} else {
+				fieldValue.SetInt(int64(0))
+			}
 		case reflect.String:
 			fieldValue.SetString(formValue.(string))
 		}
