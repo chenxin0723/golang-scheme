@@ -15,7 +15,7 @@ Here's a quick example: we parse POST form values and then decode them into a st
 
 type People struct {
 	Name string `field:"name" required:"true"`
-  Age  int `validator:"max_age_150"`
+        Age  int `validator:"max_age_150"`
 	Email  string `field:"email" validator:"email" required:"true"`
 }
 
