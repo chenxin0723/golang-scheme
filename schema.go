@@ -9,10 +9,16 @@ import (
 
 var CommomCalidators = map[string]func(in string) (bool, error){
 	"email": func(in string) (bool, error) {
-		return rxEmail.MatchString(in), nil
+		if !rxEmail.MatchString(in) {
+			return false, errors.New(fmt.Sprintf("%s is not passed", "email"))
+		}
+		return true, nil
 	},
 	"url": func(in string) (bool, error) {
-		return rxURL.MatchString(in), nil
+		if !rxURL.MatchString(in) {
+			return false, errors.New(fmt.Sprintf("%s is not passed", "url"))
+		}
+		return true, nil
 	},
 }
 
@@ -79,8 +85,8 @@ func (schemaValidator SchemaValidator) Encode(in interface{}, req *http.Request)
 
 		if validatorName := tag.Get("validator"); validatorName != "" {
 
-			if passed, _ := schemaValidator.Validate(validatorName, formStr); passed == false {
-				return errors.New(fmt.Sprintf("validator %s did not pass", validatorName))
+			if passed, err := schemaValidator.Validate(validatorName, formStr); passed == false {
+				return err
 			}
 		}
 
